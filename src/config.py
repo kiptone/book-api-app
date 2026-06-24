@@ -12,14 +12,20 @@ class Settings(BaseSettings):
 
     def __init__(self, **kwargs):
         if not kwargs.get("database_url"):
-            db_host = os.getenv("POSTGRES_HOST", "localhost")
-            db_port = os.getenv("POSTGRES_PORT", "5432")
-            db_name = os.getenv("POSTGRES_DATABASE_NAME", "events")
-            db_user = os.getenv("POSTGRES_USER", "postgres")
-            db_password = os.getenv("POSTGRES_PASSWORD", "postgres")
-            kwargs["database_url"] = (
-                f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-            )
+            # Платформа передаёт POSTGRES_CONNECTION_STRING или отдельные переменные
+            conn_string = os.getenv("POSTGRES_CONNECTION_STRING")
+            if conn_string:
+                # postgresql://user:pass@host:port/dbname → postgresql+asyncpg://user:pass@host:port/dbname
+                kwargs["database_url"] = conn_string.replace("postgres://", "postgresql+asyncpg://", 1)
+            else:
+                db_host = os.getenv("POSTGRES_HOST", "localhost")
+                db_port = os.getenv("POSTGRES_PORT", "5432")
+                db_name = os.getenv("POSTGRES_DATABASE_NAME", "events")
+                db_user = os.getenv("POSTGRES_USERNAME", "postgres")  # Платформа использует USERNAME
+                db_password = os.getenv("POSTGRES_PASSWORD", "postgres")
+                kwargs["database_url"] = (
+                    f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+                )
         super().__init__(**kwargs)
 
 
