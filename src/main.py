@@ -69,19 +69,19 @@ async def debug_status(db: AsyncSession = Depends(get_db)):
     """Debug endpoint: показывает состояние синхронизации и БД."""
     from sqlalchemy import func, select
     from .models import SyncMeta, Event, Place
-    
+
     # Сколько событий в БД
     event_count = await db.execute(select(func.count(Event.id)))
     event_count = event_count.scalar() or 0
-    
+
     # Сколько площадок в БД
     place_count = await db.execute(select(func.count(Place.id)))
     place_count = place_count.scalar() or 0
-    
+
     # Последняя синхронизация
     meta_result = await db.execute(select(SyncMeta).limit(1))
     meta = meta_result.scalar_one_or_none()
-    
+
     return {
         "events_count": event_count,
         "places_count": place_count,
@@ -89,7 +89,9 @@ async def debug_status(db: AsyncSession = Depends(get_db)):
             "last_changed_at": meta.last_changed_at.isoformat() if meta else None,
             "last_sync_time": meta.last_sync_time.isoformat() if meta else None,
             "status": meta.status if meta else None,
-        } if meta else None,
+        }
+        if meta
+        else None,
     }
 
 
