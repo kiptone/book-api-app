@@ -1,8 +1,11 @@
+import logging
 from typing import Optional
 
 import httpx
 
 from .config import settings
+
+logger = logging.getLogger(__name__)
 
 
 class EventsProviderClient:
@@ -33,9 +36,12 @@ class EventsProviderClient:
     async def get_events_page(self, changed_at: str) -> dict:
         """Возвращает одну страницу событий."""
         url = f"/api/events/?changed_at={changed_at}"
+        logger.info(f"Fetching events page: {url}")
         response = await self.client.get(url)
         response.raise_for_status()
-        return response.json()
+        data = response.json()
+        logger.info(f"Got {len(data.get('results', []))} events, next={data.get('next')}")
+        return data
 
     async def get_seats(self, event_id: str) -> list[str]:
         path = f"/api/events/{event_id}/seats/"
@@ -74,6 +80,8 @@ class EventsPaginator:
         self._next_url: Optional[str] = None
         self._initial = True
         self._buffer: list[dict] = []
+        self._pages_loaded = 0
+        self._total_events = 0
 
     def __aiter__(self):
         return self
@@ -85,12 +93,16 @@ class EventsPaginator:
                 page = await self.client.get_events_page(self.changed_at)
                 self._initial = False
                 self._next_url = page.get("next")
+                self._pages_loaded += 1
             elif self._next_url is None:
+                logger.info(f"Paginator finished: {self._pages_loaded} pages, {self._total_events} events")
                 raise StopAsyncIteration
             else:
                 page = await self.client.get(self._next_url)
                 self._next_url = page.get("next")
+                self._pages_loaded += 1
             self._buffer = page.get("results", [])
+            self._total_events += len(self._buffer)
             if not self._buffer and self._next_url:
                 continue
 
