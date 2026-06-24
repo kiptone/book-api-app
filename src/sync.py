@@ -77,5 +77,5 @@ async def sync_events(client: EventsProviderClient, session: AsyncSession):
         last_sync_time=datetime.now(timezone.utc),
         status="success",
     )
-    await session.commit()
+    # Коммит делается в trigger_sync после вызова этой функции
     logger.info(f"Sync completed: {events_count} events processed")

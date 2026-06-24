@@ -56,8 +56,7 @@ class SyncMetaRepository:
         result = await self.session.execute(select(SyncMeta).limit(1))
         meta = result.scalar_one_or_none()
         if not meta:
-            from datetime import datetime, timezone
-
+            # Первая синхронизация - начинаем с самой ранней даты
             meta = SyncMeta(
                 last_changed_at=datetime(2000, 1, 1, tzinfo=timezone.utc),
                 last_sync_time=datetime.now(timezone.utc),

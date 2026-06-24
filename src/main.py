@@ -68,9 +68,12 @@ async def health():
 async def trigger_sync(db: AsyncSession = Depends(get_db)):
     try:
         await sync_events(client, db)
+        # Гарантируем коммит после синхронизации
+        await db.commit()
         return {"status": "sync_completed"}
     except Exception as e:
         logger.error(f"Sync failed: {e}", exc_info=True)
+        await db.rollback()
         raise HTTPException(status_code=500, detail=f"Sync failed: {type(e).__name__}")
 
 
