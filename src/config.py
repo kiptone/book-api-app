@@ -4,15 +4,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(
-        env_file=".env", env_file_encoding="utf-8", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str | None = None
     events_provider_base_url: str = "https://events-provider.dev-2.python-labs.ru"
-    events_provider_api_key: str = (
-        "EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0"
-    )
+    events_provider_api_key: str = "EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0"
 
     def __init__(self, **kwargs):
         if not kwargs.get("database_url"):
