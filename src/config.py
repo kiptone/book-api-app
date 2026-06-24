@@ -11,21 +11,26 @@ class Settings(BaseSettings):
     events_provider_api_key: str = "EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0"
 
     def __init__(self, **kwargs):
+        # Сначала проверяем DATABASE_URL напрямую
         if not kwargs.get("database_url"):
-            conn_string = os.getenv("POSTGRES_CONNECTION_STRING")
-            if conn_string:
-                kwargs["database_url"] = conn_string.replace(
-                    "postgres://", "postgresql+asyncpg://", 1
-                )
+            db_url = os.getenv("DATABASE_URL")
+            if db_url:
+                kwargs["database_url"] = db_url
             else:
-                db_host = os.getenv("POSTGRES_HOST", "localhost")
-                db_port = os.getenv("POSTGRES_PORT", "5432")
-                db_name = os.getenv("POSTGRES_DATABASE_NAME", "events")
-                db_user = os.getenv("POSTGRES_USERNAME", "postgres")
-                db_password = os.getenv("POSTGRES_PASSWORD", "postgres")
-                kwargs["database_url"] = (
-                    f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
-                )
+                conn_string = os.getenv("POSTGRES_CONNECTION_STRING")
+                if conn_string:
+                    kwargs["database_url"] = conn_string.replace(
+                        "postgres://", "postgresql+asyncpg://", 1
+                    )
+                else:
+                    db_host = os.getenv("POSTGRES_HOST", "localhost")
+                    db_port = os.getenv("POSTGRES_PORT", "5432")
+                    db_name = os.getenv("POSTGRES_DATABASE_NAME", "events")
+                    db_user = os.getenv("POSTGRES_USERNAME", "postgres")
+                    db_password = os.getenv("POSTGRES_PASSWORD", "postgres")
+                    kwargs["database_url"] = (
+                        f"postgresql+asyncpg://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+                    )
         super().__init__(**kwargs)
 
 

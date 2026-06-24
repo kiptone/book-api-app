@@ -8,6 +8,16 @@ from sqlalchemy.orm import selectinload
 from .models import Event, SyncMeta, Ticket
 
 
+def parse_date(date_str: str | None) -> datetime | None:
+    """Парсит дату из строки YYYY-MM-DD в datetime."""
+    if not date_str:
+        return None
+    try:
+        return datetime.strptime(date_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+    except ValueError:
+        return None
+
+
 class EventRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
@@ -19,16 +29,18 @@ class EventRepository:
 
     async def list_filtered(self, date_from: str | None, page: int, page_size: int):
         query = select(Event).options(selectinload(Event.place))
-        if date_from:
-            query = query.where(Event.event_time >= date_from)
+        parsed_date = parse_date(date_from)
+        if parsed_date:
+            query = query.where(Event.event_time >= parsed_date)
         query = query.order_by(Event.event_time).offset((page - 1) * page_size).limit(page_size)
         result = await self.session.execute(query)
         return result.scalars().all()
 
     async def count_filtered(self, date_from: str | None) -> int:
         query = select(func.count(Event.id))
-        if date_from:
-            query = query.where(Event.event_time >= date_from)
+        parsed_date = parse_date(date_from)
+        if parsed_date:
+            query = query.where(Event.event_time >= parsed_date)
         result = await self.session.execute(query)
         return result.scalar() or 0
 

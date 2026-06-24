@@ -31,6 +31,7 @@ class EventListItem(BaseModel):
 
     id: uuid.UUID
     name: str
+    place: PlaceSchema
     event_time: datetime
     registration_deadline: datetime
     status: str

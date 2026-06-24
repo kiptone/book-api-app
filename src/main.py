@@ -1,3 +1,4 @@
+import logging
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
@@ -22,6 +23,7 @@ from .usecases import (
     SeatUnavailableError,
 )
 
+logger = logging.getLogger(__name__)
 client = EventsProviderClient()
 
 # Кэш свободных мест в памяти: {event_id: (expires_at, seats)}
@@ -66,9 +68,10 @@ async def health():
 async def trigger_sync(db: AsyncSession = Depends(get_db)):
     try:
         await sync_events(client, db)
-        return {"status": "sync_started"}
+        return {"status": "sync_completed"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Sync failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Sync failed: {type(e).__name__}")
 
 
 @app.get("/api/events", response_model=schemas.EventListResponse)
