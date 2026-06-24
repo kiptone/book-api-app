@@ -1,0 +1,22 @@
+# Environment secrets
+.env
+
+# Virtual environment
+.venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Test cache
+.pytest_cache/
+.ruff_cache/
+
+# Build artifacts
+uv.lock
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/

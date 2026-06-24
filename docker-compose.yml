@@ -1,0 +1,27 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: book-api-postgres
+    environment:
+      POSTGRES_DB: events
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+
+  app:
+    build: .
+    container_name: book-api-app
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/events
+      EVENTS_PROVIDER_API_KEY: EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
+      EVENTS_PROVIDER_BASE_URL: https://events-provider.dev-2.python-labs.ru
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
