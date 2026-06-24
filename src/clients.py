@@ -95,7 +95,9 @@ class EventsPaginator:
                 self._next_url = page.get("next")
                 self._pages_loaded += 1
             elif self._next_url is None:
-                logger.info(f"Paginator finished: {self._pages_loaded} pages, {self._total_events} events")
+                logger.info(
+                    f"Paginator finished: {self._pages_loaded} pages, {self._total_events} events"
+                )
                 raise StopAsyncIteration
             else:
                 page = await self.client.get(self._next_url)

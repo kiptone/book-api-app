@@ -28,11 +28,11 @@ async def sync_events(client: EventsProviderClient, session: AsyncSession):
     meta = await meta_repo.get()
     last_changed = meta.last_changed_at.strftime("%Y-%m-%d")
     logger.info(f"Starting sync with changed_at={last_changed}")
-    
+
     paginator = EventsPaginator(client, changed_at=last_changed)
     max_changed = meta.last_changed_at
     events_count = 0
-    
+
     async for event_data in paginator:
         try:
             # Upsert place
@@ -67,9 +67,11 @@ async def sync_events(client: EventsProviderClient, session: AsyncSession):
             if event_changed > max_changed:
                 max_changed = event_changed
         except Exception as e:
-            logger.error(f"Error processing event {event_data.get('id', 'unknown')}: {e}", exc_info=True)
+            logger.error(
+                f"Error processing event {event_data.get('id', 'unknown')}: {e}", exc_info=True
+            )
             continue
-    
+
     await meta_repo.update(
         last_changed_at=max_changed,
         last_sync_time=datetime.now(timezone.utc),
