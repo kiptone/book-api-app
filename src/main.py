@@ -6,12 +6,13 @@ from datetime import datetime, timedelta, timezone
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from fastapi import Depends, FastAPI, HTTPException, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from . import schemas
 from .clients import EventsProviderClient
 from .database import async_session, engine, get_db, wait_for_db
-from .models import Base
+from .models import Base, Event, Place, SyncMeta
 from .repositories import EventRepository, TicketRepository
 from .sync import sync_events
 from .usecases import (
@@ -67,9 +68,6 @@ async def health():
 @app.get("/api/debug/status")
 async def debug_status(db: AsyncSession = Depends(get_db)):
     """Debug endpoint: показывает состояние синхронизации и БД."""
-    from sqlalchemy import func, select
-    from .models import SyncMeta, Event, Place
-
     # Сколько событий в БД
     event_count = await db.execute(select(func.count(Event.id)))
     event_count = event_count.scalar() or 0
