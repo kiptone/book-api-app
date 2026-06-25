@@ -44,9 +44,6 @@ class EventRepository:
         result = await self.session.execute(query)
         return result.scalar() or 0
 
-    async def upsert(self, event: Event):
-        await self.session.merge(event)
-
 
 class SyncMetaRepository:
     def __init__(self, session: AsyncSession):

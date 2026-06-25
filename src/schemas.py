@@ -58,11 +58,6 @@ class TicketCreateRequest(BaseModel):
     seat: str
 
 
-class TicketCancelRequest(BaseModel):
-    event_id: str
-    ticket_id: str
-
-
 class TicketResponse(BaseModel):
     ticket_id: str
 
