@@ -79,7 +79,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
-            EVENTS_PROVIDER_BASE_URL=http://events-provider.dev-2.python-labs.ru
+            EVENTS_PROVIDER_BASE_URL=http://student-system-events-provider-web.student-system-events-provider.svc:8000
             EVENTS_PROVIDER_API_KEY=EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
 
   deploy:

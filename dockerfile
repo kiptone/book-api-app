@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir .
 COPY src/ ./src/
 
 # Переменные окружения по умолчанию
-ARG EVENTS_PROVIDER_BASE_URL=http://events-provider.dev-2.python-labs.ru
+ARG EVENTS_PROVIDER_BASE_URL=http://student-system-events-provider-web.student-system-events-provider.svc:8000
 ARG EVENTS_PROVIDER_API_KEY=EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
 
 ENV EVENTS_PROVIDER_BASE_URL=${EVENTS_PROVIDER_BASE_URL}

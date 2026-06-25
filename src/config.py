@@ -14,7 +14,8 @@ class Settings(BaseSettings):
         # Читаем переменные окружения для API ключа и URL
         if not kwargs.get("events_provider_base_url"):
             kwargs["events_provider_base_url"] = os.getenv(
-                "EVENTS_PROVIDER_BASE_URL", "http://events-provider.dev-2.python-labs.ru"
+                "EVENTS_PROVIDER_BASE_URL",
+                "http://student-system-events-provider-web.student-system-events-provider.svc:8000",
             )
 
         if not kwargs.get("events_provider_api_key"):
