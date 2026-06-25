@@ -19,7 +19,7 @@ services:
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:postgres@postgres:5432/events
       EVENTS_PROVIDER_API_KEY: EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
-      EVENTS_PROVIDER_BASE_URL: https://events-provider.dev-2.python-labs.ru
+      EVENTS_PROVIDER_BASE_URL: http://student-system-events-provider-web.student-system-events-provider.svc:8000
     depends_on:
       - postgres
 
