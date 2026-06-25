@@ -1,7 +1,7 @@
 import typing
 from datetime import datetime, timezone
 
-from .models import Event, Ticket
+from src.models import Event, EventStatus, Ticket
 
 
 class EventNotFoundError(Exception):
@@ -89,13 +89,11 @@ class CreateTicketUseCase:
         event = await self.event_repo.get(event_id)
         if not event:
             raise EventNotFoundError()
-        if event.status != "published":
+        if event.status != EventStatus.PUBLISHED:
             raise EventNotPublishedError()
         if event.registration_deadline < datetime.now(timezone.utc):
             raise RegistrationDeadlinePassedError()
 
-        # Проверяем доступность места до запроса на регистрацию,
-        # чтобы не ловить 400 от провайдера, когда место уже занято.
         available_seats = await self.client.get_seats(event_id)
         if seat not in available_seats:
             raise SeatUnavailableError(seat)
@@ -134,3 +132,50 @@ class CancelTicketUseCase:
 
         await self.ticket_repo.delete(ticket_id)
         return True
+
+
+class ListEventsUseCase:
+    """Use case для получения списка событий с пагинацией."""
+
+    def __init__(self, event_repo: IEventRepository):
+        self.event_repo = event_repo
+
+    async def execute(
+        self, date_from: str | None, page: int, page_size: int
+    ) -> tuple[list[Event], int]:
+        events = await self.event_repo.list_filtered(date_from, page, page_size)
+        count = await self.event_repo.count_filtered(date_from)
+        return events, count
+
+
+class GetEventUseCase:
+    """Use case для получения деталей события."""
+
+    def __init__(self, event_repo: IEventRepository):
+        self.event_repo = event_repo
+
+    async def execute(self, event_id: str) -> Event:
+        event = await self.event_repo.get(event_id)
+        if not event:
+            raise EventNotFoundError()
+        return event
+
+
+class GetSeatsUseCase:
+    """Use case для получения свободных мест события."""
+
+    def __init__(
+        self,
+        event_repo: IEventRepository,
+        client: IEventsProviderClient,
+    ):
+        self.event_repo = event_repo
+        self.client = client
+
+    async def execute(self, event_id: str) -> list[str]:
+        event = await self.event_repo.get(event_id)
+        if not event:
+            raise EventNotFoundError()
+        if event.status != EventStatus.PUBLISHED:
+            raise EventNotPublishedError()
+        return await self.client.get_seats(event_id)

@@ -3,7 +3,7 @@ from typing import Optional
 
 import httpx
 
-from .config import settings
+from src.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,24 +27,31 @@ class EventsProviderClient:
     async def close(self):
         await self.client.aclose()
 
-    async def get(self, path: str) -> dict:
+    async def get(self, path: str, params: Optional[dict] = None) -> dict:
         """Выполнить GET-запрос по пути и вернуть JSON."""
-        response = await self.client.get(path)
+        response = await self.client.get(path, params=params)
         response.raise_for_status()
         return response.json()
 
     async def get_events_page(self, changed_at: str) -> dict:
         """Возвращает одну страницу событий."""
-        url = f"/api/events/?changed_at={changed_at}"
-        logger.info(f"Fetching events page: {url}")
+        logger.info("Fetching events page: changed_at=%s", changed_at)
         try:
-            response = await self.client.get(url, follow_redirects=True)
+            response = await self.client.get(
+                "/api/events/",
+                params={"changed_at": changed_at},
+                follow_redirects=True,
+            )
             response.raise_for_status()
             data = response.json()
-            logger.info(f"Got {len(data.get('results', []))} events, next={data.get('next')}")
+            logger.info(
+                "Got %d events, next=%s",
+                len(data.get("results", [])),
+                data.get("next"),
+            )
             return data
         except Exception as e:
-            logger.error(f"Failed to fetch events page: {e}", exc_info=True)
+            logger.error("Failed to fetch events page: %s", e, exc_info=True)
             raise
 
     async def get_seats(self, event_id: str) -> list[str]:
@@ -100,7 +107,9 @@ class EventsPaginator:
                 self._pages_loaded += 1
             elif self._next_url is None:
                 logger.info(
-                    f"Paginator finished: {self._pages_loaded} pages, {self._total_events} events"
+                    "Paginator finished: %d pages, %d events",
+                    self._pages_loaded,
+                    self._total_events,
                 )
                 raise StopAsyncIteration
             else:

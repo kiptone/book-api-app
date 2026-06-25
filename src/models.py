@@ -1,9 +1,15 @@
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
+
+
+class EventStatus(str, Enum):
+    NEW = "new"
+    PUBLISHED = "published"
 
 
 class Base(DeclarativeBase):
@@ -30,7 +36,7 @@ class Event(Base):
     place: Mapped[Place] = relationship(back_populates="events")
     event_time: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     registration_deadline: Mapped[datetime] = mapped_column(DateTime(timezone=True))
-    status: Mapped[str] = mapped_column(String(20))
+    status: Mapped[EventStatus] = mapped_column(String(20))
     number_of_visitors: Mapped[int] = mapped_column(Integer)
     changed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))

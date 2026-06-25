@@ -26,14 +26,14 @@ Backend-сервис агрегатор для работы с Events Provider A
 ### Требования
 
 - Docker Desktop
-- uv (Python package manager)
+- uv (Python package manager) — `curl -LsSf https://astral.sh/uv/install.sh | sh`
 
 ### Запуск
 
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/kiptone/book-api-app.git
-cd book-api-app
+git clone https://github.com/<your-org>/events-aggregator.git
+cd events-aggregator
 
 # Настроить переменные окружения
 cp .env.example .env
@@ -62,10 +62,16 @@ GET /api/health
 # Ответ: {"status": "ok"}
 ```
 
+### Debug статус
+```bash
+GET /api/debug/status
+# Ответ: информация о количестве событий и последней синхронизации
+```
+
 ### Синхронизация
 ```bash
 POST /api/sync/trigger
-# Ответ: {"status": "sync_started"}
+# Ответ: {"status": "sync_completed"}
 ```
 
 ### Список событий
@@ -125,23 +131,27 @@ uv run ruff format --check src/ tests/
 
 ```
 src/
-├── clients.py          # Events Provider API клиент
-├── config.py           # Настройки (pydantic-settings)
-├── database.py         # SQLAlchemy сессии
-├── main.py             # FastAPI приложение, endpoints
-├── models.py           # SQLAlchemy модели
-├── repositories.py     # Repository pattern для БД
-├── schemas.py          # Pydantic схемы
-├── sync.py             # Логика синхронизации
-└── usecases.py         # Бизнес-логика (use cases)
+├── main.py                    # FastAPI app, endpoints → делегирует в сервисы
+├── services/
+│   ├── events_service.py      # Бизнес-логика: события, синхронизация, места (кэш 30с)
+│   ├── tickets_service.py     # Бизнес-логика: билеты
+│   └── debug_service.py       # Отладочная информация
+├── usecases.py                # Чистые use cases с typing.Protocol DI
+├── repositories.py            # Repository pattern (EventRepository, TicketRepository)
+├── clients.py                 # EventsProviderClient + EventsPaginator (cursor-based)
+├── sync.py                    # Оркестрация синхронизации
+├── models.py                  # SQLAlchemy модели + EventStatus enum
+├── schemas.py                 # Pydantic схемы
+├── config.py                  # pydantic-settings
+└── database.py                # SQLAlchemy async session factory
 ```
 
-### Паттерны
+### Ключевые паттерны
 
+- **Service Layer** — бизнес-логика отделена от API в `services/`
 - **Repository** — абстракция доступа к БД
-- **Use Cases** — бизнес-логика, независимая от фреймворков
-- **Protocol (typing)** — интерфейсы для внедрения зависимостей
-- **Iterator** — EventsPaginator для обхода cursor-based пагинации
+- **Use Cases** — чистая бизнес-логика с `typing.Protocol` для DI
+- **Iterator** — `EventsPaginator` для обхода cursor-based пагинации
 
 ## CI/CD
 

@@ -3,6 +3,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from src.models import EventStatus
 from src.usecases import (
     CreateTicketUseCase,
     EventNotFoundError,
@@ -18,7 +19,7 @@ async def test_create_ticket_success():
     client.register = AsyncMock(return_value="aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")
 
     event = MagicMock()
-    event.status = "published"
+    event.status = EventStatus.PUBLISHED
 
     event.registration_deadline = datetime.now(timezone.utc) + timedelta(days=1)
     event.id = "22222222-2222-2222-2222-222222222222"
@@ -66,7 +67,7 @@ async def test_create_ticket_event_not_published():
     client = MagicMock()
 
     event = MagicMock()
-    event.status = "new"
+    event.status = EventStatus.NEW
 
     event.registration_deadline = datetime.now(timezone.utc) + timedelta(days=1)
     event_repo = MagicMock()
@@ -91,7 +92,7 @@ async def test_create_ticket_seat_unavailable():
     client.register = AsyncMock()
 
     event = MagicMock()
-    event.status = "published"
+    event.status = EventStatus.PUBLISHED
     event.registration_deadline = datetime.now(timezone.utc) + timedelta(days=1)
     event.id = "22222222-2222-2222-2222-222222222222"
 

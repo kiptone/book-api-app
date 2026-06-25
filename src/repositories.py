@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from .models import Event, SyncMeta, Ticket
+from src.models import Event, SyncMeta, Ticket
 
 
 def parse_date(date_str: str | None) -> datetime | None:
@@ -53,7 +53,6 @@ class SyncMetaRepository:
         result = await self.session.execute(select(SyncMeta).limit(1))
         meta = result.scalar_one_or_none()
         if not meta:
-            # Первая синхронизация - начинаем с самой ранней даты
             meta = SyncMeta(
                 last_changed_at=datetime(2000, 1, 1, tzinfo=timezone.utc),
                 last_sync_time=datetime.now(timezone.utc),
@@ -112,3 +111,8 @@ class TicketRepository:
         except ValueError:
             return None
         return await self.session.get(Ticket, tid)
+
+    async def get_by_event(self, event_id: str) -> list[Ticket]:
+        query = select(Ticket).where(Ticket.event_id == event_id)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
