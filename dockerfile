@@ -8,8 +8,11 @@ RUN pip install --no-cache-dir .
 COPY src/ ./src/
 
 # Переменные окружения по умолчанию
-ENV EVENTS_PROVIDER_BASE_URL=https://events-provider.dev-2.python-labs.ru
-ENV EVENTS_PROVIDER_API_KEY=EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
+ARG EVENTS_PROVIDER_BASE_URL=http://events-provider.dev-2.python-labs.ru
+ARG EVENTS_PROVIDER_API_KEY=EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
+
+ENV EVENTS_PROVIDER_BASE_URL=${EVENTS_PROVIDER_BASE_URL}
+ENV EVENTS_PROVIDER_API_KEY=${EVENTS_PROVIDER_API_KEY}
 
 EXPOSE 8000
 

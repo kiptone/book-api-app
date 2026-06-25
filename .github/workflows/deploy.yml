@@ -78,9 +78,12 @@ jobs:
           tags: ghcr.io/${{ steps.repo.outputs.repo }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            EVENTS_PROVIDER_BASE_URL=http://events-provider.dev-2.python-labs.ru
+            EVENTS_PROVIDER_API_KEY=EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0
 
   deploy:
-    needs: build   
+    needs: build
     runs-on: ubuntu-latest
 
     steps:

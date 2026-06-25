@@ -37,11 +37,15 @@ class EventsProviderClient:
         """Возвращает одну страницу событий."""
         url = f"/api/events/?changed_at={changed_at}"
         logger.info(f"Fetching events page: {url}")
-        response = await self.client.get(url)
-        response.raise_for_status()
-        data = response.json()
-        logger.info(f"Got {len(data.get('results', []))} events, next={data.get('next')}")
-        return data
+        try:
+            response = await self.client.get(url, follow_redirects=True)
+            response.raise_for_status()
+            data = response.json()
+            logger.info(f"Got {len(data.get('results', []))} events, next={data.get('next')}")
+            return data
+        except Exception as e:
+            logger.error(f"Failed to fetch events page: {e}", exc_info=True)
+            raise
 
     async def get_seats(self, event_id: str) -> list[str]:
         path = f"/api/events/{event_id}/seats/"
