@@ -7,11 +7,22 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     database_url: str | None = None
-    events_provider_base_url: str = "https://events-provider.dev-2.python-labs.ru"
-    events_provider_api_key: str = "EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0"
+    events_provider_base_url: str
+    events_provider_api_key: str
 
     def __init__(self, **kwargs):
-        # Сначала проверяем DATABASE_URL напрямую
+        # Читаем переменные окружения для API ключа и URL
+        if not kwargs.get("events_provider_base_url"):
+            kwargs["events_provider_base_url"] = os.getenv(
+                "EVENTS_PROVIDER_BASE_URL", "https://events-provider.dev-2.python-labs.ru"
+            )
+
+        if not kwargs.get("events_provider_api_key"):
+            kwargs["events_provider_api_key"] = os.getenv(
+                "EVENTS_PROVIDER_API_KEY", "EFyEe5G6vy1GLV8khDYwDSndSKYo0UMPYRZszM6Pxm0"
+            )
+
+        # Читаем DATABASE_URL
         if not kwargs.get("database_url"):
             db_url = os.getenv("DATABASE_URL")
             if db_url:
