@@ -5,7 +5,9 @@ from datetime import datetime, timedelta, timezone
 
 import httpx
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -58,6 +60,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Events Aggregator", lifespan=lifespan)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Конвертирует 422 (FastAPI) в 400 (для совместимости с тестами LMS)."""
+    return JSONResponse(
+        status_code=400,
+        content={"detail": exc.errors()},
+    )
 
 
 @app.get("/api/health")
