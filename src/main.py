@@ -93,7 +93,13 @@ async def list_events(
     db: AsyncSession = Depends(get_db),
 ):
     service = EventsService(db, client)
-    events, count, next_url, prev_url = await service.list_events(date_from, page, page_size)
+    events, count = await service.list_events(date_from, page, page_size)
+
+    next_url = None
+    if len(events) == page_size:
+        next_url = "/api/events?page={}&page_size={}".format(page + 1, page_size)
+    prev_url = "/api/events?page={}&page_size={}".format(page - 1, page_size) if page > 1 else None
+
     return {
         "count": count,
         "next": next_url,
@@ -121,7 +127,7 @@ async def get_seats(event_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     except EventsNotFoundError:
         raise HTTPException(status_code=404, detail="Event not found")
     except EventsNotPublishedError:
-        raise HTTPException(status_code=400, detail="Event is not published yet")
+        raise HTTPException(status_code=400, detail="Event is not published")
 
 
 @app.post("/api/tickets", response_model=TicketResponse, status_code=201)

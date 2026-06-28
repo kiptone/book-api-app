@@ -41,16 +41,11 @@ class EventsService:
 
     async def list_events(
         self, date_from: Optional[str], page: int, page_size: int
-    ) -> tuple[list[Event], int, Optional[str], Optional[str]]:
+)       -> tuple[list[Event], int]:
+        """Возвращает список событий и общее количество, без URL пагинации"""
         events = await self.event_repo.list_filtered(date_from, page, page_size)
         count = await self.event_repo.count_filtered(date_from)
-        next_url = (
-            f"/api/events?page={page + 1}&page_size={page_size}"
-            if len(events) == page_size
-            else None
-        )
-        prev_url = f"/api/events?page={page - 1}&page_size={page_size}" if page > 1 else None
-        return events, count, next_url, prev_url
+        return events, count
 
     async def get_event(self, event_id: str) -> Event:
         event = await self.event_repo.get(event_id)
