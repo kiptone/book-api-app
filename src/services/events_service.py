@@ -41,7 +41,7 @@ class EventsService:
 
     async def list_events(
         self, date_from: Optional[str], page: int, page_size: int
-)       -> tuple[list[Event], int]:
+    ) -> tuple[list[Event], int]:
         """Возвращает список событий и общее количество, без URL пагинации"""
         events = await self.event_repo.list_filtered(date_from, page, page_size)
         count = await self.event_repo.count_filtered(date_from)

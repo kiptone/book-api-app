@@ -1,5 +1,6 @@
 import logging
 from typing import Optional
+from urllib.parse import urljoin
 
 import httpx
 
@@ -55,7 +56,7 @@ class EventsProviderClient:
             raise
 
     async def get_seats(self, event_id: str) -> list[str]:
-        path = "/api/events/{}/seats/".format(event_id)
+        path = urljoin(self.base_url + "/", "api/events/{}/seats/".format(event_id))
         response = await self.client.get(path)
         response.raise_for_status()
         return response.json()["seats"]
@@ -63,7 +64,7 @@ class EventsProviderClient:
     async def register(
         self, event_id: str, first_name: str, last_name: str, email: str, seat: str
     ) -> str:
-        path = "/api/events/{}/register/".format(event_id)
+        path = urljoin(self.base_url + "/", "api/events/{}/register/".format(event_id))
         payload = {
             "first_name": first_name,
             "last_name": last_name,
@@ -75,7 +76,7 @@ class EventsProviderClient:
         return response.json()["ticket_id"]
 
     async def unregister(self, event_id: str, ticket_id: str) -> bool:
-        path = "/api/events/{}/unregister/".format(event_id)
+        path = urljoin(self.base_url + "/", "api/events/{}/unregister/".format(event_id))
         payload = {"ticket_id": ticket_id}
         response = await self.client.request("DELETE", path, json=payload)
         response.raise_for_status()

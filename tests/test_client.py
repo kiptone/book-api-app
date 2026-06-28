@@ -14,7 +14,7 @@ async def test_get_seats():
     client.client.get = AsyncMock(return_value=mock_response)
     seats = await client.get_seats("ev1")
     assert seats == ["A1", "A2"]
-    client.client.get.assert_called_once_with("/api/events/ev1/seats/")
+    client.client.get.assert_called_once_with("http://test/api/events/ev1/seats/")
 
 
 @pytest.mark.asyncio
